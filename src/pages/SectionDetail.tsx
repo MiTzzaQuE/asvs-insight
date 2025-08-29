@@ -40,6 +40,8 @@ const SectionDetail = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchValue, setSearchValue] = useState('');
+  const [levelFilter, setLevelFilter] = useState('1');
+  const [statusFilter, setStatusFilter] = useState('all');
   // Track local changes for each requirement
   const [localChanges, setLocalChanges] = useState<{[key: string]: {[field: string]: string}}>({});
   const [savingFields, setSavingFields] = useState<{[key: string]: boolean}>({});
@@ -198,10 +200,24 @@ const SectionDetail = () => {
     }
   };
 
-  const filteredRequirements = requirements.filter(req =>
-    req.verification_requirement?.toLowerCase().includes(searchValue.toLowerCase()) ||
-    req.comment?.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const filteredRequirements = requirements.filter(req => {
+    // Search filter
+    const matchesSearch = req.verification_requirement?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      req.comment?.toLowerCase().includes(searchValue.toLowerCase());
+    
+    // Level filter
+    const matchesLevel = levelFilter === 'all' || req.asvs_level === levelFilter;
+    
+    // Status filter
+    let matchesStatus = true;
+    if (statusFilter === 'answered') {
+      matchesStatus = ['Valid', 'Non-valid', 'Not Applicable'].includes(req.status);
+    } else if (statusFilter === 'unanswered') {
+      matchesStatus = req.status === 'Unanswered';
+    }
+    
+    return matchesSearch && matchesLevel && matchesStatus;
+  });
 
   if (loading) {
     return (
@@ -253,6 +269,37 @@ const SectionDetail = () => {
               <p className="text-muted-foreground mt-2">
                 Manage and track verification status for {section.name.toLowerCase()} requirements
               </p>
+            </div>
+
+            <div className="flex gap-4 items-center flex-wrap">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium">Level:</label>
+                <Select value={levelFilter} onValueChange={setLevelFilter}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Level 1</SelectItem>
+                    <SelectItem value="2">Level 2</SelectItem>
+                    <SelectItem value="3">Level 3</SelectItem>
+                    <SelectItem value="all">All Levels</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium">Status:</label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="answered">Answered</SelectItem>
+                    <SelectItem value="unanswered">Unanswered</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {filteredRequirements.length === 0 ? (
