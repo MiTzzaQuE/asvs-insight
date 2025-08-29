@@ -14,16 +14,135 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      requirements: {
+        Row: {
+          area: string | null
+          asvs_level: string | null
+          comment: string | null
+          created_at: string
+          cwe: string | null
+          id: string
+          nist: string | null
+          section_code: string | null
+          section_id: string
+          source_code_reference: string | null
+          status: Database["public"]["Enums"]["requirement_status"]
+          tool_used: string | null
+          updated_at: string
+          user_id: string | null
+          verification_requirement: string | null
+        }
+        Insert: {
+          area?: string | null
+          asvs_level?: string | null
+          comment?: string | null
+          created_at?: string
+          cwe?: string | null
+          id?: string
+          nist?: string | null
+          section_code?: string | null
+          section_id: string
+          source_code_reference?: string | null
+          status?: Database["public"]["Enums"]["requirement_status"]
+          tool_used?: string | null
+          updated_at?: string
+          user_id?: string | null
+          verification_requirement?: string | null
+        }
+        Update: {
+          area?: string | null
+          asvs_level?: string | null
+          comment?: string | null
+          created_at?: string
+          cwe?: string | null
+          id?: string
+          nist?: string | null
+          section_code?: string | null
+          section_id?: string
+          source_code_reference?: string | null
+          status?: Database["public"]["Enums"]["requirement_status"]
+          tool_used?: string | null
+          updated_at?: string
+          user_id?: string | null
+          verification_requirement?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requirements_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "section_stats"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "requirements_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sections: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          order_index: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          order_index: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          order_index?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      overall_stats: {
+        Row: {
+          asvs_level_acquired: string | null
+          overall_validity_percentage: number | null
+          total_sum: number | null
+          valid_sum: number | null
+        }
+        Relationships: []
+      }
+      section_stats: {
+        Row: {
+          order_index: number | null
+          section_id: string | null
+          section_name: string | null
+          section_slug: string | null
+          total_count: number | null
+          valid_count: number | null
+          validity_percentage: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      requirement_status:
+        | "Valid"
+        | "Non-valid"
+        | "Not Applicable"
+        | "Unanswered"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +269,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      requirement_status: [
+        "Valid",
+        "Non-valid",
+        "Not Applicable",
+        "Unanswered",
+      ],
+    },
   },
 } as const
