@@ -95,14 +95,16 @@ const Admin = () => {
   };
 
   const addRequirement = () => {
-    setRequirements(prev => [...prev, {
+    const newRequirement = {
       verification_requirement: '',
       asvs_level: 'L1',
       section_code: '',
       area: '',
       nist: '',
       cwe: ''
-    }]);
+    };
+    // Add new requirement at the top
+    setRequirements(prev => [newRequirement, ...prev]);
   };
 
   const updateRequirement = (index: number, field: string, value: string) => {
@@ -258,10 +260,12 @@ const Admin = () => {
                   <CardTitle className="flex items-center justify-between">
                     Requirements Management
                     <div className="flex gap-2">
-                      <Button onClick={loadSampleRequirements} variant="outline" size="sm">
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Load Sample
-                      </Button>
+                      {requirements.length === 0 && (
+                        <Button onClick={loadSampleRequirements} variant="outline" size="sm">
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Load Sample
+                        </Button>
+                      )}
                       <Button onClick={addRequirement} size="sm">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Requirement

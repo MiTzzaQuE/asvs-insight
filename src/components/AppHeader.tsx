@@ -1,5 +1,4 @@
-import { Search, User, LogOut } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
+import { SearchResults } from '@/components/SearchResults';
 
 interface AppHeaderProps {
   searchValue?: string;
@@ -26,16 +26,10 @@ export function AppHeader({ searchValue = '', onSearchChange, showSearch = true 
       <SidebarTrigger />
       
       {showSearch && (
-        <div className="flex-1 max-w-md relative">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search requirements..."
-            className="pl-8"
-            value={searchValue}
-            onChange={(e) => onSearchChange?.(e.target.value)}
-          />
-        </div>
+        <SearchResults
+          searchValue={searchValue}
+          onSearchChange={onSearchChange || (() => {})}
+        />
       )}
 
       <div className="ml-auto">

@@ -57,19 +57,28 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">ASVS L1 Checklist</CardTitle>
-          <CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/10 p-4">
+      <Card className="w-full max-w-md shadow-lg border-0 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="text-center space-y-3">
+          <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center mb-2">
+            <span className="text-primary-foreground font-bold text-xl">AS</span>
+          </div>
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+            ASVS L1 Checklist
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
             Sign in to access your security verification checklist
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-muted/50">
+              <TabsTrigger value="signin" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger value="signup" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Sign Up
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
@@ -96,7 +105,7 @@ export default function Auth() {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 transition-all duration-300" 
                   disabled={loading}
                 >
                   {loading ? 'Signing In...' : 'Sign In'}
@@ -129,7 +138,7 @@ export default function Auth() {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 transition-all duration-300" 
                   disabled={loading}
                 >
                   {loading ? 'Signing Up...' : 'Sign Up'}
