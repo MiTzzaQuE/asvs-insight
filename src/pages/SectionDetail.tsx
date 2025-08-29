@@ -205,8 +205,12 @@ const SectionDetail = () => {
     const matchesSearch = req.verification_requirement?.toLowerCase().includes(searchValue.toLowerCase()) ||
       req.comment?.toLowerCase().includes(searchValue.toLowerCase());
     
-    // Level filter
-    const matchesLevel = levelFilter === 'all' || req.asvs_level === levelFilter;
+    // Level filter - map to correct ASVS level format
+    let matchesLevel = true;
+    if (levelFilter !== 'all') {
+      const targetLevel = `L${levelFilter}`;
+      matchesLevel = req.asvs_level === targetLevel;
+    }
     
     // Status filter
     let matchesStatus = true;
@@ -215,6 +219,7 @@ const SectionDetail = () => {
     } else if (statusFilter === 'unanswered') {
       matchesStatus = req.status === 'Unanswered';
     }
+    // 'all' shows all statuses, so no additional filtering needed
     
     return matchesSearch && matchesLevel && matchesStatus;
   });
