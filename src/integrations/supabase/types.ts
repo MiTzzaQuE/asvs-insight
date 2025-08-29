@@ -29,7 +29,7 @@ export type Database = {
           status: Database["public"]["Enums"]["requirement_status"]
           tool_used: string | null
           updated_at: string
-          user_id: string | null
+          user_id: string
           verification_requirement: string | null
         }
         Insert: {
@@ -46,7 +46,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["requirement_status"]
           tool_used?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id: string
           verification_requirement?: string | null
         }
         Update: {
@@ -63,7 +63,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["requirement_status"]
           tool_used?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
           verification_requirement?: string | null
         }
         Relationships: [
