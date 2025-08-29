@@ -21,6 +21,8 @@ interface Requirement {
   asvs_level: string | null;
   nist: string | null;
   cwe: string | null;
+  section_code: string | null;
+  area: string | null;
 }
 
 interface Section {
@@ -197,8 +199,14 @@ const SectionDetail = () => {
                           {requirement.status}
                         </Badge>
                       </CardTitle>
-                      {(requirement.asvs_level || requirement.nist || requirement.cwe) && (
+                      {(requirement.section_code || requirement.area || requirement.asvs_level || requirement.nist || requirement.cwe) && (
                         <CardDescription className="flex gap-2 flex-wrap">
+                          {requirement.section_code && (
+                            <Badge variant="outline">Section: {requirement.section_code}</Badge>
+                          )}
+                          {requirement.area && (
+                            <Badge variant="outline">Area: {requirement.area}</Badge>
+                          )}
                           {requirement.asvs_level && (
                             <Badge variant="outline">ASVS: {requirement.asvs_level}</Badge>
                           )}
