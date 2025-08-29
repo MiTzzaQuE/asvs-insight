@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -26,12 +26,14 @@ export function SearchResults({ searchValue, onSearchChange }: SearchResultsProp
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [actualSearchTerm, setActualSearchTerm] = useState('');
   const navigate = useNavigate();
   const { user } = useAuth();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const searchRequirements = async () => {
-      if (!searchValue.trim() || searchValue.length < 2 || !user) {
+      if (!actualSearchTerm.trim() || actualSearchTerm.length < 2 || !user) {
         setResults([]);
         return;
       }
@@ -49,7 +51,7 @@ export function SearchResults({ searchValue, onSearchChange }: SearchResultsProp
             sections!inner(name, slug)
           `)
           .eq('user_id', user.id)
-          .or(`verification_requirement.ilike.%${searchValue}%,section_code.ilike.%${searchValue}%,cwe.ilike.%${searchValue}%`)
+          .or(`verification_requirement.ilike.%${actualSearchTerm}%,section_code.ilike.%${actualSearchTerm}%,cwe.ilike.%${actualSearchTerm}%`)
           .limit(10);
 
         if (error) throw error;
@@ -75,12 +77,30 @@ export function SearchResults({ searchValue, onSearchChange }: SearchResultsProp
 
     const debounceTimer = setTimeout(searchRequirements, 300);
     return () => clearTimeout(debounceTimer);
-  }, [searchValue, user]);
+  }, [actualSearchTerm, user]);
 
   const handleResultClick = (result: SearchResult) => {
     navigate(`/section/${result.section_slug}`);
     setOpen(false);
     onSearchChange('');
+    setActualSearchTerm('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      setActualSearchTerm(searchValue);
+      setOpen(true);
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+      inputRef.current?.blur();
+    }
+  };
+
+  const handleInputFocus = () => {
+    if (actualSearchTerm.length >= 2) {
+      setOpen(true);
+    }
   };
 
   const truncateText = (text: string, maxLength: number) => {
@@ -89,20 +109,19 @@ export function SearchResults({ searchValue, onSearchChange }: SearchResultsProp
   };
 
   return (
-    <Popover open={open && searchValue.length >= 2} onOpenChange={setOpen}>
+    <Popover open={open && actualSearchTerm.length >= 2} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className="flex-1 max-w-md relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
+            ref={inputRef}
             type="search"
-            placeholder="Search requirements..."
+            placeholder="Search requirements (press Enter to search)..."
             className="w-full pl-8 pr-4 py-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             value={searchValue}
-            onChange={(e) => {
-              onSearchChange(e.target.value);
-              setOpen(true);
-            }}
-            onFocus={() => setOpen(true)}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={handleInputFocus}
           />
         </div>
       </PopoverTrigger>
@@ -120,7 +139,7 @@ export function SearchResults({ searchValue, onSearchChange }: SearchResultsProp
               </div>
             ) : results.length === 0 ? (
               <CommandEmpty className="p-4 text-sm text-muted-foreground text-center">
-                {searchValue.length < 2 ? 'Type at least 2 characters to search' : 'No requirements found.'}
+                {actualSearchTerm.length < 2 ? 'Press Enter to search' : 'No requirements found.'}
               </CommandEmpty>
             ) : (
               <CommandGroup heading="Requirements">
