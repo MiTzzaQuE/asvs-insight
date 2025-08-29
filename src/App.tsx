@@ -9,6 +9,9 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import SectionDetail from "./pages/SectionDetail";
+import Results from "./pages/Results";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +28,27 @@ const App = () => (
               <ProtectedRoute>
                 <SidebarProvider>
                   <Index />
+                </SidebarProvider>
+              </ProtectedRoute>
+            } />
+            <Route path="/results" element={
+              <ProtectedRoute>
+                <SidebarProvider>
+                  <Results />
+                </SidebarProvider>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <SidebarProvider>
+                  <Admin />
+                </SidebarProvider>
+              </ProtectedRoute>
+            } />
+            <Route path="/section/:slug" element={
+              <ProtectedRoute>
+                <SidebarProvider>
+                  <SectionDetail />
                 </SidebarProvider>
               </ProtectedRoute>
             } />
