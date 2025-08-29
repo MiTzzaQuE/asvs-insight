@@ -119,6 +119,24 @@ const Admin = () => {
     setRequirements(prev => prev.filter((_, i) => i !== index));
   };
 
+  const validateRequirements = () => {
+    const errors: string[] = [];
+    
+    requirements.forEach((req, index) => {
+      if (!req.verification_requirement?.trim()) {
+        errors.push(`Requirement ${index + 1}: Verification requirement is required`);
+      }
+      if (!req.section_code?.trim()) {
+        errors.push(`Requirement ${index + 1}: Section code is required`);
+      }
+      if (!req.area?.trim()) {
+        errors.push(`Requirement ${index + 1}: Area is required`);
+      }
+    });
+    
+    return errors;
+  };
+
   const saveRequirements = async () => {
     if (!selectedSection) {
       toast({
@@ -129,8 +147,23 @@ const Admin = () => {
       return;
     }
 
+    // Validate requirements
+    const validationErrors = validateRequirements();
+    if (validationErrors.length > 0) {
+      toast({
+        title: "Validation Error",
+        description: validationErrors.join('; '),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSaving(true);
     try {
+      // Separate existing and new requirements
+      const existingRequirements = requirements.filter(req => req.id);
+      const newRequirements = requirements.filter(req => !req.id);
+
       // Delete existing requirements for this section and user
       await supabase
         .from('requirements')
@@ -138,13 +171,16 @@ const Admin = () => {
         .eq('section_id', selectedSection)
         .eq('user_id', user!.id);
 
-      // Insert new requirements
-      const requirementsToInsert = requirements.map(req => ({
-        ...req,
-        section_id: selectedSection,
-        user_id: user!.id,
-        status: 'Unanswered' as const
-      }));
+      // Prepare requirements for insertion (exclude id for new ones)
+      const requirementsToInsert = requirements.map(req => {
+        const { id, ...reqWithoutId } = req;
+        return {
+          ...reqWithoutId,
+          section_id: selectedSection,
+          user_id: user!.id,
+          status: 'Unanswered' as const
+        };
+      });
 
       const { error } = await supabase
         .from('requirements')
@@ -162,9 +198,12 @@ const Admin = () => {
       console.error('Error saving requirements:', error);
       toast({
         title: "Error",
-        description: "Failed to save requirements",
+        description: `Failed to save requirements: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
+      
+      // Refetch to restore the previous state if save failed
+      fetchRequirements();
     } finally {
       setSaving(false);
     }
