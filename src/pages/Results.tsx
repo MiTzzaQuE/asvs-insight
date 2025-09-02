@@ -9,6 +9,8 @@ import { Download, FileText, CheckCircle, XCircle, AlertCircle } from 'lucide-re
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface SectionStat {
   section_name: string;
@@ -82,29 +84,67 @@ const Results = () => {
     return 'destructive';
   };
 
-  const exportResults = () => {
-    // Create a comprehensive report
-    const report = {
-      timestamp: new Date().toISOString(),
-      overall: overallStats,
-      sections: sectionStats,
-      user: user?.email
-    };
+  const exportResults = async () => {
+    try {
+      toast({
+        title: "Generating PDF",
+        description: "Creating your results report...",
+      });
 
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `asvs-l1-results-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+      // Get the main content area
+      const element = document.querySelector('main');
+      if (!element) {
+        throw new Error('Could not find content to export');
+      }
 
-    toast({
-      title: "Exported",
-      description: "Results exported successfully",
-    });
+      // Create canvas from the content
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+      });
+
+      // Create PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      const imgData = canvas.toDataURL('image/png');
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if needed
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Save the PDF
+      const fileName = `asvs-l1-results-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+
+      toast({
+        title: "PDF Exported",
+        description: "Results exported successfully as PDF",
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export results as PDF",
+        variant: "destructive",
+      });
+    }
   };
 
   const filteredSections = sectionStats.filter(section =>
@@ -117,7 +157,7 @@ const Results = () => {
         <AppSidebar />
         <div className="flex-1 flex flex-col">
           <AppHeader showSearch={false} />
-          <main className="flex-1 p-6 bg-muted/20">
+          <main className="flex-1 p-6 bg-muted/20" id="results-content">
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
             </div>
@@ -137,7 +177,7 @@ const Results = () => {
           onSearchChange={setSearchValue}
         />
         
-        <main className="flex-1 p-6 bg-muted/20">
+        <main className="flex-1 p-6 bg-muted/20" id="results-content">
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
