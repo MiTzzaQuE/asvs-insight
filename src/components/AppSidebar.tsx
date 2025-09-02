@@ -44,7 +44,9 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed';
 
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent/50';
+    isActive 
+      ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium border-l-2 border-sidebar-primary shadow-sm' 
+      : 'hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground transition-colors';
 
   return (
     <Sidebar className={isCollapsed ? 'w-14' : 'w-60'} collapsible="icon">
